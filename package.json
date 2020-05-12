@@ -26,7 +26,6 @@
     "devexpress-gantt": "^1.0.0",
     "devextreme": "^19.2.7",
     "devextreme-angular": "^19.2.7",
-    "faker": "^4.1.0",
     "jszip": "^3.4.0",
     "quill": "^1.3.7",
     "rxjs": "~6.5.4",

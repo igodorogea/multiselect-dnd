@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import faker from 'faker';
+
+declare const faker: any;
 
 @Component({
   selector: 'app-mat-multiselect-dnd',
