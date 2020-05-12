@@ -1,0 +1,84 @@
+<div class="multiselect-header">
+  <div class="msh-label msh-source-label">{{ sourceLabel }}</div>
+  <div class="msh-divider"></div>
+  <div class="msh-label msh-target-label">{{ targetLabel }}</div>
+</div>
+<ng-container *ngIf="vm$ | async as vm">
+  <div class="multiselect-body" cdkDropListGroup>
+    <div class="msb-container msb-source-container">
+      <app-multiselect-search
+        (search)="filterSourceData($event)"
+      ></app-multiselect-search>
+      <cdk-virtual-scroll-viewport
+        itemSize="30"
+        cdkDropList
+        class="msb-list msb-source-list"
+        cdkDropListSortingDisabled
+        (cdkDropListDropped)="drop($event)"
+      >
+        <div
+          cdkDrag
+          [cdkDragData]="item.sourceIndex"
+          class="msb-item msb-source-item"
+          [class.selected]="item.selected"
+          (click)="selectSourceItem(item.sourceIndex, $event)"
+          *cdkVirtualFor="let item of vm.sourceData"
+        >
+          [{{ item.sourceIndex }}]: {{ item.value }}
+        </div>
+      </cdk-virtual-scroll-viewport>
+    </div>
+    <div class="msb-action-buttons">
+      <button
+        [disabled]="vm.isDisabledMoveSelectedFromS2T"
+        (click)="moveSelectedFromSourceToTarget()"
+      >
+        <app-svg-icon svgIcon="arrow_forward"></app-svg-icon>
+      </button>
+      <button
+        [disabled]="vm.isDisabledMoveSelectedFromT2S"
+        (click)="moveSelectedFromTargetToSource()"
+        class="reverse"
+      >
+        <app-svg-icon svgIcon="arrow_forward"></app-svg-icon>
+      </button>
+      <button
+        [disabled]="vm.isDisabledMoveAllFromS2T"
+        (click)="moveAllFromSourceToTarget()"
+      >
+        <app-svg-icon svgIcon="double_arrow"></app-svg-icon>
+      </button>
+      <button
+        [disabled]="vm.isDisabledMoveAllFromT2S"
+        (click)="moveAllFromTargetToSource()"
+        class="reverse"
+      >
+        <app-svg-icon svgIcon="double_arrow"></app-svg-icon>
+      </button>
+    </div>
+    <div class="msb-container msb-target-container">
+      <app-multiselect-search
+        (search)="filterTargetData($event)"
+      ></app-multiselect-search>
+      <div
+        id="msbTargetContainer"
+        class="msb-list msb-target-list"
+        cdkDropList
+        [cdkDropListData]="vm.targetData"
+        (cdkDropListDropped)="drop($event)"
+      >
+        <div
+          cdkDrag
+          [cdkDragData]="item.sourceIndex"
+          cdkDragLockAxis="y"
+          class="msb-item msb-target-item"
+          [class.selected]="item.selected"
+          *ngFor="let item of vm.targetData"
+          (click)="selectTargetItem(item.sourceIndex, $event)"
+        >
+          [{{ item.sourceIndex }}]: {{ item.value }}
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>

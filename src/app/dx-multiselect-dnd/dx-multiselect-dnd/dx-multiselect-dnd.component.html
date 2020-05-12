@@ -1,0 +1,20 @@
+<div class="form">
+  <dx-sortable
+    filter=".dx-treeview-item"
+    [allowDropInsideItem]="true"
+    [allowReordering]="true"
+    (onDragChange)="onDragChange($event)"
+    (onReorder)="onReorder($event)">
+    <dx-tree-view
+      id="simple-treeview"
+      [items]="employees"
+      dataStructure="plain"
+      [rootValue]="-1"
+      parentIdExpr="Head_ID"
+      keyExpr="ID"
+      displayExpr="Full_Name"
+      [width]="300"
+      [height]="300"
+    ></dx-tree-view>
+  </dx-sortable>
+</div>

@@ -1,0 +1,32 @@
+<div id="list-demo">
+  <div class="widget-container">
+    <dx-list
+      selectionMode="multiple"
+      [items]="plannedTasks"
+      [repaintChangesOnly]="true"
+      keyExpr="id"
+    >
+      <dxo-item-dragging
+        group="tasks"
+        [data]="plannedTasks"
+        [onDragStart]="onDragStart"
+        [onAdd]="onAdd"
+        [onRemove]="onRemove"
+      ></dxo-item-dragging>
+    </dx-list>
+
+    <div #doingTasksList>
+      <dx-list [items]="doingTasks" [repaintChangesOnly]="true" keyExpr="id">
+        <dxo-item-dragging
+          group="tasks"
+          [data]="doingTasks"
+          [allowReordering]="true"
+          [onDragStart]="onDragStart"
+          [onAdd]="onAdd"
+          [onRemove]="onRemove"
+          [boundary]="doingTasksList"
+        ></dxo-item-dragging>
+      </dx-list>
+    </div>
+  </div>
+</div>

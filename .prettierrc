@@ -2,13 +2,13 @@
   "parser": "typescript",
   "singleQuote": true,
   "arrowParens": "avoid",
+  "bracketSpacing": false,
   "trailingComma": "es5",
   "overrides": [
     {
       "files": "*.html",
       "options": {
-        "parser": "angular",
-        "bracketSpacing": false
+        "parser": "angular"
       }
     }
   ]
