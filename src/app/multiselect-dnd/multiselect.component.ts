@@ -12,6 +12,10 @@ import {
 } from '@angular/core';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {MultiselectDataModel, MultiselectStore} from './multiselect.store';
+import {SvgIconRegistry} from '../svg-icon/svg-icon.registry';
+
+const arrowForwardIcon = require('!raw-loader!./arrow_forward_ios-24px.svg');
+const doubleArrowIcon = require('!raw-loader!./double_arrow-24px.svg');
 
 @Component({
   selector: 'app-multiselect',
@@ -31,7 +35,19 @@ export class MultiselectComponent implements OnInit, OnChanges {
 
   public vm$ = this._store.vm$;
 
-  constructor(private _store: MultiselectStore) {}
+  constructor(
+    private _store: MultiselectStore,
+    private _iconRegistry: SvgIconRegistry
+  ) {
+    _iconRegistry.addSvgIcon(
+      'arrow_forward',
+      arrowForwardIcon.default || arrowForwardIcon
+    );
+    _iconRegistry.addSvgIcon(
+      'double_arrow',
+      doubleArrowIcon.default || doubleArrowIcon
+    );
+  }
 
   public ngOnInit() {
     this._store.updateData(this.sourceData, this.initialSelectedIndexes);

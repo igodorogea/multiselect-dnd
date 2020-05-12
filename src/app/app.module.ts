@@ -6,7 +6,7 @@ import { RouterModule, Routes } from '@angular/router';
 const routes: Routes = [
   {
     path: 'material',
-    loadChildren: () => import('./mat-multiselect-dnd/mat-multiselect-dnd.module').then(m => m.MatMultiselectDndModule),
+    loadChildren: () => import('./multiselect-dnd/multiselect-dnd.module').then(m => m.MultiselectDndModule),
   },
   {
     path: 'devextreme',

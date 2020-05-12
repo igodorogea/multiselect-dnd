@@ -1,8 +1,8 @@
 {
   "hosting": [
     {
-      "target": "asdertyrew",
-      "public": "dist/asdertyrew",
+      "target": "storybook",
+      "public": "dist/storybook",
       "ignore": [
         "firebase.json",
         "**/.*",

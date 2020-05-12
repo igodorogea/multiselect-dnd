@@ -89,6 +89,11 @@ describe('MultiselectService', () => {
   });
 
   it('should drop from source to target', () => {
+    service.updateData(data);
+    service.dropItemFromSourceToTarget(7, 0);
+    expect(vm.sourceData.length).toBe(19);
+    expect(vm.targetData.length).toBe(1);
+    expect(helpers.targetIndexes).toEqual([7]);
     service.updateData(data, [0, 1, 2, 3, 4]);
     expect(vm.sourceData.length).toBe(15);
     expect(vm.targetData.length).toBe(5);
@@ -226,6 +231,13 @@ describe('MultiselectService', () => {
       });
 
       it('should drop from source to target', () => {
+        service.updateData(data, [10, 11, 12, 13, 14]);
+        service.filterTargetData('culpa');
+        service.dropItemFromSourceToTarget(9, 0);
+        expect(vm.targetData.length).toBe(1);
+        expect(helpers.targetIndexes).toEqual([9]);
+        service.filterTargetData('');
+        expect(helpers.targetIndexes).toEqual([10, 11, 12, 13, 14, 9]);
         service.updateData(data, [10, 11, 12, 13, 14]);
         service.filterSourceData('dolor');
         service.dropItemFromSourceToTarget(0, 3);

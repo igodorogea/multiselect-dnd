@@ -1,5 +1,11 @@
-import { Component, ElementRef, HostBinding, Input, ViewEncapsulation } from '@angular/core';
-import { svgIconsList } from './svg-icons-list';
+import {
+  Component,
+  ElementRef,
+  HostBinding,
+  Input,
+  ViewEncapsulation,
+} from '@angular/core';
+import {SvgIconRegistry} from './svg-icon.registry';
 
 @Component({
   selector: 'app-svg-icon[svgIcon]',
@@ -9,15 +15,13 @@ import { svgIconsList } from './svg-icons-list';
 })
 export class SvgIconComponent {
   @HostBinding('class') class = 'svg-icon';
-  @Input() temp: number;
   @Input()
-  set svgIcon(iconName: keyof typeof svgIconsList) {
-    const content = svgIconsList[iconName];
-    if (!content) {
-      throw Error(`Invalid icon name: "${iconName}"`);
-    }
-    this._ref.nativeElement.innerHTML = content;
+  set svgIcon(iconName: string) {
+    this._ref.nativeElement.innerHTML = this._iconRegistry.getSvgIcon(iconName);
   }
 
-  constructor(private _ref: ElementRef) {}
+  constructor(
+    private _ref: ElementRef,
+    private _iconRegistry: SvgIconRegistry
+  ) {}
 }

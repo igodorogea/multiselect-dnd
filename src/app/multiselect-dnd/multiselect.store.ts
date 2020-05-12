@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Observable, ReplaySubject} from 'rxjs';
 import {scan} from 'rxjs/operators';
-import {MutationFn, updateVmFn} from './reactive-vie-model';
+import {MutationFn, updateVmFn} from './reactive-view-model';
 
 export type MultiselectDataModel = {
   value: string;
@@ -138,11 +138,13 @@ export class MultiselectStore {
           i => i.sourceIndex === toSourceIndex
         );
         toIndex = _toIndex + 1;
-      } else {
+      } else if (vm.targetData.length > 0) {
         const toSourceIndex = vm.targetData[0].sourceIndex;
         toIndex = vm._targetData.findIndex(
           i => i.sourceIndex === toSourceIndex
         );
+      } else if (vm._targetData.length > 0) {
+        toIndex = vm._targetData.length;
       }
       const targetData = [
         ...vm._targetData.slice(0, toIndex),
@@ -258,7 +260,9 @@ export class MultiselectStore {
   public moveAllFromTargetToSource() {
     this.vmSubj.next(vm => {
       const targetSourceIndexes = vm.targetData.map(item => item.sourceIndex);
-      const targetData = vm._targetData.filter(item => !targetSourceIndexes.includes(item.sourceIndex));
+      const targetData = vm._targetData.filter(
+        item => !targetSourceIndexes.includes(item.sourceIndex)
+      );
       const sourceData = vm._sourceData.map(item => {
         if (targetSourceIndexes.includes(item.sourceIndex)) {
           item.hidden = false;
