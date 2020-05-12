@@ -1,0 +1,19 @@
+{
+  "hosting": [
+    {
+      "target": "asdertyrew",
+      "public": "dist/asdertyrew",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  ]
+}

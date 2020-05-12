@@ -131,6 +131,10 @@
               "devServerTarget": "asdertyrew:serve:production"
             }
           }
+        },
+        "deploy": {
+          "builder": "@angular/fire:deploy",
+          "options": {}
         }
       }
     }
