@@ -12,19 +12,28 @@
       <cdk-virtual-scroll-viewport
         itemSize="30"
         cdkDropList
-        class="msb-list msb-source-list"
+        [cdkDropListData]="vm.sourceData"
         cdkDropListSortingDisabled
-        (cdkDropListDropped)="drop($event)"
+        class="msb-list msb-source-list"
+        tabindex="0"
+        (keydown.control.a)="selectAllItemsInList($event, vm.sourceData)"
       >
         <div
           cdkDrag
           [cdkDragData]="item.sourceIndex"
+          (cdkDragStarted)="dragStarted($event, vm.sourceData, item, previewCount)"
           class="msb-item msb-source-item"
           [class.selected]="item.selected"
           (click)="selectSourceItem(item.sourceIndex, $event)"
-          *cdkVirtualFor="let item of vm.sourceData"
+          *cdkVirtualFor="
+            let item of vm.sourceData;
+            trackBy: trackBySourceIndex
+          "
         >
-          [{{ item.sourceIndex }}]: {{ item.value }}
+          <ng-container
+            *ngTemplateOutlet="listItem; context: {$implicit: item}"
+          ></ng-container>
+          <div #previewCount class="msb-drag-preview-count"></div>
         </div>
       </cdk-virtual-scroll-viewport>
     </div>
@@ -55,30 +64,100 @@
       >
         <app-svg-icon svgIcon="double_arrow"></app-svg-icon>
       </button>
+      <button
+        [disabled]="vm.isDisabledMoveSelectedFromT2S"
+        (click)="groupSelectedTargetItems()"
+      >
+        <app-svg-icon svgIcon="fold"></app-svg-icon>
+      </button>
     </div>
     <div class="msb-container msb-target-container">
       <app-multiselect-search
         (search)="filterTargetData($event)"
       ></app-multiselect-search>
       <div
+        cdkScrollable
         id="msbTargetContainer"
         class="msb-list msb-target-list"
-        cdkDropList
-        [cdkDropListData]="vm.targetData"
-        (cdkDropListDropped)="drop($event)"
       >
         <div
-          cdkDrag
-          [cdkDragData]="item.sourceIndex"
-          cdkDragLockAxis="y"
-          class="msb-item msb-target-item"
-          [class.selected]="item.selected"
-          *ngFor="let item of vm.targetData"
-          (click)="selectTargetItem(item.sourceIndex, $event)"
+          class="msb-group msb-target-group"
+          *ngFor="let group of vm.targetGroups; trackBy: trackByGroupIndex"
         >
-          [{{ item.sourceIndex }}]: {{ item.value }}
+          <div class="msb-group-header">
+            <div class="msb-group-label">Group {{ group.index + 1 }}</div>
+            <button
+              (click)="removeTargetGroup(group.index)"
+            >
+              <app-svg-icon svgIcon="unfold"></app-svg-icon>
+            </button>
+          </div>
+          <div
+            class="msb-group-items"
+            cdkDropList
+            [cdkDropListData]="group.items"
+            (cdkDropListDropped)="dropGroup(group.index, $event)"
+            tabindex="0"
+            (keydown.control.a)="selectAllItemsInList($event, group.items)"
+          >
+            <div
+              *ngFor="let groupItem of group.items; trackBy: trackBySourceIndex"
+              cdkDrag
+              cdkDragLockAxis="y"
+              [cdkDragData]="groupItem.sourceIndex"
+              (cdkDragStarted)="dragStarted($event, group.items, groupItem, previewCount)"
+              class="msb-item msb-group-item"
+              [class.selected]="groupItem.selected"
+              (click)="
+                selectTargetGroupItem(
+                  group.index,
+                  groupItem.sourceIndex,
+                  $event
+                )
+              "
+            >
+              <ng-container
+                *ngTemplateOutlet="listItem; context: {$implicit: groupItem}"
+              ></ng-container>
+              <div #previewCount class="msb-drag-preview-count"></div>
+            </div>
+          </div>
+        </div>
+        <div
+          cdkDropList
+          [cdkDropListData]="vm.targetData"
+          (cdkDropListDropped)="drop($event)"
+          class="msb-target-data"
+          tabindex="0"
+          (keydown.control.a)="selectAllItemsInList($event, vm.targetData)"
+        >
+          <div
+            *ngFor="let item of vm.targetData; trackBy: trackBySourceIndex"
+            cdkDrag
+            [cdkDragData]="item.sourceIndex"
+            (cdkDragStarted)="dragStarted($event, vm.targetData, item, previewCount)"
+            cdkDragLockAxis="y"
+            class="msb-item msb-target-item"
+            [class.selected]="item.selected"
+            (click)="selectTargetItem(item.sourceIndex, $event)"
+          >
+            <ng-container
+              *ngTemplateOutlet="
+                targetItemTemplate || listItem;
+                context: {$implicit: item}
+              "
+            ></ng-container>
+            <div #previewCount class="msb-drag-preview-count"></div>
+          </div>
+          <div class="gap"></div>
         </div>
       </div>
     </div>
   </div>
 </ng-container>
+
+<ng-template #listItem let-item>
+  [{{ item.sourceIndex }}]: {{ item.value }}
+</ng-template>
+
+<ng-content></ng-content>

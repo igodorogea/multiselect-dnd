@@ -31,6 +31,14 @@ describe('MultiselectService', () => {
   let vm: IMultiselectVM;
 
   const helpers = {
+    get targetGroupIndexes() {
+      return vm.targetGroups[0].items.map(i => i.sourceIndex);
+    },
+    get targetGroupSelectedIndexes() {
+      return vm.targetGroups[0].items
+        .filter(i => i.selected)
+        .map(i => i.sourceIndex);
+    },
     get targetIndexes() {
       return vm.targetData.map(i => i.sourceIndex);
     },
@@ -90,22 +98,31 @@ describe('MultiselectService', () => {
 
   it('should drop from source to target', () => {
     service.updateData(data);
-    service.dropItemFromSourceToTarget(7, 0);
+    service.dropItemIntoTarget(vm.sourceData, 7, 0);
     expect(vm.sourceData.length).toBe(19);
-    expect(vm.targetData.length).toBe(1);
     expect(helpers.targetIndexes).toEqual([7]);
     service.updateData(data, [0, 1, 2, 3, 4]);
     expect(vm.sourceData.length).toBe(15);
-    expect(vm.targetData.length).toBe(5);
     expect(helpers.targetIndexes).toEqual([0, 1, 2, 3, 4]);
-    service.dropItemFromSourceToTarget(7, 3);
+    service.dropItemIntoTarget(vm.sourceData, 7, 3);
     expect(vm.sourceData.length).toBe(14);
     expect(vm.targetData.length).toBe(6);
     expect(helpers.targetIndexes).toEqual([0, 1, 2, 7, 3, 4]);
-    service.dropItemFromSourceToTarget(15, 0);
+    service.dropItemIntoTarget(vm.sourceData, 15, 0);
     expect(vm.sourceData.length).toBe(13);
     expect(vm.targetData.length).toBe(7);
     expect(helpers.targetIndexes).toEqual([15, 0, 1, 2, 7, 3, 4]);
+    service.updateData(data);
+    service.selectSourceItem(4);
+    service.selectSourceItem(5);
+    service.dropItemIntoTarget(vm.sourceData, 7, 0);
+    expect(vm.sourceData.length).toBe(17);
+    expect(helpers.targetIndexes).toEqual([4, 5, 7]);
+    service.selectSourceItem(0);
+    service.selectSourceItem(1);
+    service.dropItemIntoTarget(vm.sourceData, 3, 2);
+    expect(vm.sourceData.length).toBe(14);
+    expect(helpers.targetIndexes).toEqual([4, 5, 0, 1, 3, 7]);
   });
 
   it('should select source item', () => {
@@ -134,6 +151,18 @@ describe('MultiselectService', () => {
     service.selectTargetItem(3);
     expect(vm.isDisabledMoveSelectedFromT2S).toBe(true);
     expect(helpers.targetSelectedIndexes).toEqual([]);
+  });
+
+  it('should select all in list', () => {
+    service.updateData(data, [0, 1, 2, 3, 4]);
+    service.selectAllItemsInList(vm.sourceData);
+    expect(helpers.sourceSelectedIndexes.length).toBe(15);
+    service.selectAllItemsInList(vm.sourceData);
+    expect(helpers.sourceSelectedIndexes.length).toBe(0);
+    service.selectAllItemsInList(vm.targetData);
+    expect(helpers.targetSelectedIndexes.length).toBe(5);
+    service.selectAllItemsInList(vm.targetData);
+    expect(helpers.targetSelectedIndexes.length).toBe(0);
   });
 
   it('should move selected from source to target', () => {
@@ -209,11 +238,22 @@ describe('MultiselectService', () => {
         expect(helpers.sourceSelectedIndexes).toEqual([2]);
       });
 
+      it('should select all in list', () => {
+        service.updateData(data);
+        service.filterSourceData('dolor');
+        service.selectAllItemsInList(vm.sourceData);
+        service.filterSourceData('');
+        expect(helpers.sourceSelectedIndexes.length).toBe(5);
+      });
+
       it('should move selected from source to target', () => {
         service.updateData(data, []);
-        service.filterSourceData('dolor');
         service.selectSourceItem(0);
         service.selectSourceItem(1);
+        service.selectSourceItem(10);
+        expect(helpers.sourceSelectedIndexes.length).toBe(3);
+        service.filterSourceData('dolor');
+        expect(helpers.sourceSelectedIndexes.length).toBe(2);
         service.moveSelectedFromSourceToTarget();
         expect(vm.sourceData.length).toBe(3);
         expect(vm.targetData.length).toBe(2);
@@ -233,32 +273,42 @@ describe('MultiselectService', () => {
       it('should drop from source to target', () => {
         service.updateData(data, [10, 11, 12, 13, 14]);
         service.filterTargetData('culpa');
-        service.dropItemFromSourceToTarget(9, 0);
+        service.dropItemIntoTarget(vm.sourceData, 9, 0);
         expect(vm.targetData.length).toBe(1);
         expect(helpers.targetIndexes).toEqual([9]);
         service.filterTargetData('');
         expect(helpers.targetIndexes).toEqual([10, 11, 12, 13, 14, 9]);
         service.updateData(data, [10, 11, 12, 13, 14]);
         service.filterSourceData('dolor');
-        service.dropItemFromSourceToTarget(0, 3);
+        service.dropItemIntoTarget(vm.sourceData, 0, 3);
         expect(vm.sourceData.length).toBe(3);
         expect(vm.targetData.length).toBe(6);
         expect(helpers.targetIndexes).toEqual([10, 11, 12, 0, 13, 14]);
         service.filterTargetData('dolor');
-        service.dropItemFromSourceToTarget(2, 2);
+        service.dropItemIntoTarget(vm.sourceData, 2, 2);
         expect(vm.sourceData.length).toBe(2);
         expect(vm.targetData.length).toBe(3);
         expect(helpers.targetIndexes).toEqual([12, 0, 2]);
+        service.updateData(data, [3, 4]);
+        service.filterTargetData('');
+        service.selectAllItemsInList(vm.sourceData);
+        service.filterSourceData('dolor');
+        service.dropItemIntoTarget(vm.sourceData, 0, 1);
+        expect(vm.sourceData.length).toBe(0);
+        expect(helpers.targetIndexes).toEqual([3, 0, 1, 2, 12, 17, 4]);
       });
     });
 
     describe('target data', () => {
       it('should work', () => {
-        service.updateData([
-          'dolore possimus eos',
-          'ipsum doloribus voluptatem',
-          'dolores veniam perferendis',
-        ], [0, 1, 2]);
+        service.updateData(
+          [
+            'dolore possimus eos',
+            'ipsum doloribus voluptatem',
+            'dolores veniam perferendis',
+          ],
+          [0, 1, 2]
+        );
         service.filterTargetData('');
         expect(vm.targetData.length).toBe(3);
         service.filterTargetData('dolore');
@@ -270,22 +320,37 @@ describe('MultiselectService', () => {
       });
 
       it('should select the correct item', () => {
-        service.updateData([
-          'dolore possimus eos',
-          'ipsum doloribus voluptatem',
-          'dolores veniam perferendis',
-        ], [0, 1, 2]);
+        service.updateData(
+          [
+            'dolore possimus eos',
+            'ipsum doloribus voluptatem',
+            'dolores veniam perferendis',
+          ],
+          [0, 1, 2]
+        );
         service.filterTargetData('dolore');
         service.selectTargetItem(2);
         expect(helpers.targetSelectedIndexes).toEqual([2]);
       });
 
+      it('should select all in list', () => {
+        service.updateData(data);
+        service.moveAllFromSourceToTarget();
+        service.filterTargetData('dolor');
+        service.selectAllItemsInList(vm.targetData);
+        service.filterSourceData('');
+        expect(helpers.targetSelectedIndexes.length).toBe(5);
+      });
+
       it('should move selected from target to source', () => {
         service.updateData(data, []);
         service.moveAllFromSourceToTarget();
-        service.filterTargetData('dolor');
         service.selectTargetItem(0);
         service.selectTargetItem(1);
+        service.selectTargetItem(10);
+        expect(helpers.targetSelectedIndexes.length).toBe(3);
+        service.filterTargetData('dolor');
+        expect(helpers.targetSelectedIndexes.length).toBe(2);
         service.moveSelectedFromTargetToSource();
         expect(vm.sourceData.length).toBe(2);
         expect(vm.targetData.length).toBe(3);
@@ -303,7 +368,7 @@ describe('MultiselectService', () => {
         expect(vm.targetData.length).toBe(15);
       });
 
-      it('should drop from source to target', () => {
+      it('should order target items', () => {
         service.updateData(data, []);
         service.moveAllFromSourceToTarget();
         service.filterTargetData('dolor');
@@ -315,6 +380,98 @@ describe('MultiselectService', () => {
         service.orderTargetData(2, 0);
         expect(helpers.targetIndexes).toEqual([1, 2, 12, 17, 0]);
       });
+    });
+  });
+
+  describe('grouping', () => {
+    beforeEach(() => {
+      service.updateData(data, [0, 1, 2, 3, 4]);
+      service.selectTargetItem(0);
+      service.selectTargetItem(1);
+      service.selectTargetItem(2);
+      service.groupSelectedTargetItems();
+    });
+
+    it('should group selected target items', () => {
+      expect(helpers.targetSelectedIndexes.length).toBe(0);
+      expect(helpers.targetIndexes.length).toBe(2);
+      expect(vm.targetGroups.length).toBe(1);
+      expect(helpers.targetGroupIndexes).toEqual([0, 1, 2]);
+    });
+
+    it('should select item', () => {
+      service.selectTargetGroupItem(0, 1);
+      expect(
+        vm.targetGroups[0].items.filter(i => i.selected).map(i => i.sourceIndex)
+      ).toEqual([1]);
+    });
+
+    it('should select all in list', () => {
+      service.selectAllItemsInList(vm.targetGroups[0].items);
+      expect(vm.targetGroups[0].items.filter(i => i.selected).length).toBe(3);
+    });
+
+    it('should order target group data', () => {
+      service.orderTargetGroupData(0, 2, 0);
+      expect(helpers.targetGroupIndexes).toEqual([2, 0, 1]);
+      service.orderTargetGroupData(0, 0, 2);
+      expect(helpers.targetGroupIndexes).toEqual([0, 1, 2]);
+    });
+
+    it('should drop item into target group', () => {
+      expect(vm.targetGroups[0].items.length).toBe(3);
+      service.dropItemIntoTargetGroup(vm.sourceData, 0, 5, 1);
+      expect(vm.targetGroups[0].items.length).toBe(4);
+      expect(vm.sourceData.length).toBe(14);
+      expect(helpers.targetGroupIndexes).toEqual([0, 5, 1, 2]);
+      service.dropItemIntoTargetGroup(vm.targetData, 0, 4, 2);
+      expect(vm.targetGroups[0].items.length).toBe(5);
+      expect(vm.targetData.length).toBe(1);
+      expect(helpers.targetGroupIndexes).toEqual([0, 5, 4, 1, 2]);
+      service.selectTargetItem(3);
+      service.groupSelectedTargetItems();
+      expect(vm.targetGroups.length).toBe(2);
+      expect(vm.targetGroups[1].items.length).toBe(1);
+      service.dropItemIntoTargetGroup(vm.targetGroups[0].items, 1, 5, 1);
+      expect(vm.targetGroups[0].items.length).toBe(4);
+      expect(vm.targetGroups[1].items.length).toBe(2);
+      expect(helpers.targetGroupIndexes).toEqual([0, 4, 1, 2]);
+      expect(vm.targetGroups[1].items.map(i => i.sourceIndex)).toEqual([3, 5]);
+    });
+
+    it('should drop from target group to target', () => {
+      expect(vm.targetGroups[0].items.length).toBe(3);
+      service.selectTargetGroupItem(0, 0);
+      service.dropItemIntoTarget(vm.targetGroups[0].items, 1, 1);
+      expect(vm.targetGroups[0].items.length).toBe(1);
+      expect(helpers.targetIndexes).toEqual([3, 0, 1, 4]);
+      expect(helpers.targetSelectedIndexes.length).toBe(0);
+    });
+
+    it('should drop selected items into target group', () => {
+      expect(helpers.targetGroupIndexes).toEqual([0, 1, 2]);
+      service.selectSourceItem(10);
+      service.selectSourceItem(11);
+      service.dropItemIntoTargetGroup(vm.sourceData, 0, 15, 2);
+      expect(helpers.targetGroupIndexes).toEqual([0, 1, 10, 11, 15, 2]);
+      expect(helpers.targetGroupSelectedIndexes.length).toBe(0);
+    });
+
+    it('should filter target groups', () => {
+      service.selectTargetItem(3);
+      service.selectTargetItem(4);
+      service.groupSelectedTargetItems();
+      expect(vm.targetGroups[0].items.length).toBe(3);
+      expect(vm.targetGroups[1].items.length).toBe(2);
+      service.filterTargetData('dolor');
+      expect(vm.targetGroups[0].items.length).toBe(3);
+      expect(vm.targetGroups[1].items.length).toBe(0);
+      service.filterTargetData('!@#qweer');
+      expect(vm.targetGroups[0].items.length).toBe(0);
+      expect(vm.targetGroups[1].items.length).toBe(0);
+      service.filterTargetData('');
+      expect(vm.targetGroups[0].items.length).toBe(3);
+      expect(vm.targetGroups[1].items.length).toBe(2);
     });
   });
 });
