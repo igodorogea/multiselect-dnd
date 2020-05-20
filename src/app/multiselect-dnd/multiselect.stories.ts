@@ -53,8 +53,8 @@ export const withCustomTemplate = () => ({
         [targetLabel]="targetLabel"
     >
         <ng-template #targetItemTemplate let-item>
-            <div class="form-group row no-gutters">
-                <label for="select" class="col col-form-label">{{item.value}}</label>
+            <div class="row no-gutters">
+                <label class="col col-form-label">{{item.value}}</label>
                 <div class="col">
                     <select name="select" id="select" class="custom-select w-auto">
                         <option value="default">default</option>

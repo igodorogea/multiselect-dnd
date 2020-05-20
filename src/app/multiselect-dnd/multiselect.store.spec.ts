@@ -399,6 +399,21 @@ describe('MultiselectService', () => {
       expect(helpers.targetGroupIndexes).toEqual([0, 1, 2]);
     });
 
+    it('should remove target group', () => {
+      expect(helpers.targetIndexes.length).toBe(2);
+      expect(vm.targetGroups.length).toBe(1);
+      service.removeTargetGroup(vm.targetGroups[0]);
+      expect(helpers.targetIndexes).toEqual([0, 1, 2, 3, 4]);
+      expect(vm.targetGroups.length).toBe(0);
+    });
+
+    it('should collapse target group', () => {
+      service.toggleTargetGroup(vm.targetGroups[0]);
+      expect(vm.targetGroups[0].collapsed).toBe(true);
+      service.toggleTargetGroup(vm.targetGroups[0]);
+      expect(vm.targetGroups[0].collapsed).toBe(false);
+    });
+
     it('should select item', () => {
       service.selectTargetGroupItem(0, 1);
       expect(

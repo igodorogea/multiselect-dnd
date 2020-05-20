@@ -21,7 +21,9 @@
         <div
           cdkDrag
           [cdkDragData]="item.sourceIndex"
-          (cdkDragStarted)="dragStarted($event, vm.sourceData, item, previewCount)"
+          (cdkDragStarted)="
+            dragStarted($event, vm.sourceData, item, previewCount)
+          "
           class="msb-item msb-source-item"
           [class.selected]="item.selected"
           (click)="selectSourceItem(item.sourceIndex, $event)"
@@ -39,32 +41,35 @@
     </div>
     <div class="msb-action-buttons">
       <button
+        class="msb-action-button icon-btn"
         [disabled]="vm.isDisabledMoveSelectedFromS2T"
         (click)="moveSelectedFromSourceToTarget()"
       >
         <app-svg-icon svgIcon="arrow_forward"></app-svg-icon>
       </button>
       <button
+        class="msb-action-button icon-btn reverse"
         [disabled]="vm.isDisabledMoveSelectedFromT2S"
         (click)="moveSelectedFromTargetToSource()"
-        class="reverse"
       >
         <app-svg-icon svgIcon="arrow_forward"></app-svg-icon>
       </button>
       <button
+        class="msb-action-button icon-btn"
         [disabled]="vm.isDisabledMoveAllFromS2T"
         (click)="moveAllFromSourceToTarget()"
       >
         <app-svg-icon svgIcon="double_arrow"></app-svg-icon>
       </button>
       <button
+        class="msb-action-button icon-btn reverse"
         [disabled]="vm.isDisabledMoveAllFromT2S"
         (click)="moveAllFromTargetToSource()"
-        class="reverse"
       >
         <app-svg-icon svgIcon="double_arrow"></app-svg-icon>
       </button>
       <button
+        class="msb-action-button icon-btn"
         [disabled]="vm.isDisabledMoveSelectedFromT2S"
         (click)="groupSelectedTargetItems()"
       >
@@ -85,14 +90,18 @@
           *ngFor="let group of vm.targetGroups; trackBy: trackByGroupIndex"
         >
           <div class="msb-group-header">
-            <div class="msb-group-label">Group {{ group.index + 1 }}</div>
+            <div class="msb-group-label" (click)="toggleTargetGroup(group)">
+              Group {{ group.index + 1 }}
+            </div>
             <button
-              (click)="removeTargetGroup(group.index)"
+              class="msb-action-button icon-btn"
+              (click)="removeTargetGroup(group)"
             >
               <app-svg-icon svgIcon="unfold"></app-svg-icon>
             </button>
           </div>
           <div
+            [@targetGroupExpansion]="group.collapsed ? 'collapsed' : 'expanded'"
             class="msb-group-items"
             cdkDropList
             [cdkDropListData]="group.items"
@@ -105,7 +114,9 @@
               cdkDrag
               cdkDragLockAxis="y"
               [cdkDragData]="groupItem.sourceIndex"
-              (cdkDragStarted)="dragStarted($event, group.items, groupItem, previewCount)"
+              (cdkDragStarted)="
+                dragStarted($event, group.items, groupItem, previewCount)
+              "
               class="msb-item msb-group-item"
               [class.selected]="groupItem.selected"
               (click)="
@@ -117,7 +128,10 @@
               "
             >
               <ng-container
-                *ngTemplateOutlet="listItem; context: {$implicit: groupItem}"
+                *ngTemplateOutlet="
+                  targetGroupItemTemplate || targetItemTemplate || listItem;
+                  context: {$implicit: groupItem}
+                "
               ></ng-container>
               <div #previewCount class="msb-drag-preview-count"></div>
             </div>
@@ -135,7 +149,9 @@
             *ngFor="let item of vm.targetData; trackBy: trackBySourceIndex"
             cdkDrag
             [cdkDragData]="item.sourceIndex"
-            (cdkDragStarted)="dragStarted($event, vm.targetData, item, previewCount)"
+            (cdkDragStarted)="
+              dragStarted($event, vm.targetData, item, previewCount)
+            "
             cdkDragLockAxis="y"
             class="msb-item msb-target-item"
             [class.selected]="item.selected"

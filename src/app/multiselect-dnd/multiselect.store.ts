@@ -423,11 +423,16 @@ export class MultiselectStore {
 
   public groupSelectedTargetItems() {
     this.vmSubj.next(vm => {
-      const selectedItems = vm.targetData.filter(item => item.selected);
-      selectedItems.forEach(item => (item.selected = false));
-      const targetData = vm._targetData.filter(
-        item => !selectedItems.includes(item)
-      );
+      const selectedItems = vm.targetData
+        .filter(item => item.selected)
+        .map(item => ({...item, selected: false}));
+      const selectedIndexes = selectedItems.map(item => item.sourceIndex);
+      vm._targetData.forEach(item => {
+        if (selectedIndexes.includes(item.sourceIndex)) {
+          item.hidden = true;
+          item.selected = false;
+        }
+      });
       const group: MultiselectGroupModel = {
         items: selectedItems,
         collapsed: false,
@@ -435,12 +440,37 @@ export class MultiselectStore {
       };
       return {
         ...vm,
-        ...this._updateTargetData(targetData, vm.searchTermTarget),
+        ...this._updateTargetData(vm._targetData, vm.searchTermTarget),
         ...this._updateTargetGroupsData(
           [...vm._targetGroups, group],
           vm.searchTermTarget
         ),
       };
+    });
+  }
+
+  public removeTargetGroup(group: MultiselectGroupModel) {
+    this.vmSubj.next(vm => {
+      const targetGroups = vm._targetGroups.filter(_group => _group !== group);
+      const groupIndexes = group.items.map(item => item.sourceIndex);
+      vm._targetData.forEach(item => {
+        if (groupIndexes.includes(item.sourceIndex)) {
+          item.hidden = false;
+          item.selected = false;
+        }
+      });
+      return {
+        ...vm,
+        ...this._updateTargetData(vm._targetData, vm.searchTermTarget),
+        ...this._updateTargetGroupsData(targetGroups, vm.searchTermTarget),
+      };
+    });
+  }
+
+  public toggleTargetGroup(group: MultiselectGroupModel) {
+    this.vmSubj.next(vm => {
+      group.collapsed = !group.collapsed;
+      return vm;
     });
   }
 

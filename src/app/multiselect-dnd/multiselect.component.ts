@@ -19,6 +19,7 @@ import {
   MultiselectStore,
 } from './multiselect.store';
 import {SvgIconRegistry} from '../svg-icon/svg-icon.registry';
+import {animate, state, style, transition, trigger} from '@angular/animations';
 
 const arrowForwardIcon = require('!raw-loader!./icons/arrow_forward_ios-24px.svg');
 const doubleArrowIcon = require('!raw-loader!./icons/double_arrow-24px.svg');
@@ -32,6 +33,14 @@ const unfoldIcon = require('!raw-loader!./icons/enlarge2.svg');
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   viewProviders: [MultiselectStore],
+  animations: [
+    trigger('targetGroupExpansion', [
+      state('collapsed, void', style({height: '0px', visibility: 'hidden'})),
+      state('expanded', style({height: '*', visibility: 'visible'})),
+      transition('expanded <=> collapsed, void => collapsed',
+        animate('225ms cubic-bezier(0.4,0.0,0.2,1)')),
+    ])
+  ]
 })
 export class MultiselectComponent implements OnInit, OnChanges {
   @HostBinding('class') class = 'multiselect-dnd';
@@ -41,6 +50,7 @@ export class MultiselectComponent implements OnInit, OnChanges {
   @Input() initialSelectedIndexes: number[];
   @Output() update = new EventEmitter<any[]>();
   @ContentChild('targetItemTemplate') targetItemTemplate: TemplateRef<any>;
+  @ContentChild('targetGroupItemTemplate') targetGroupItemTemplate: TemplateRef<any>;
 
   public vm$ = this._store.vm$;
 
@@ -186,8 +196,8 @@ export class MultiselectComponent implements OnInit, OnChanges {
     this._store.groupSelectedTargetItems();
   }
 
-  public removeTargetGroup(groupIndex: number) {
-    this._store.groupSelectedTargetItems();
+  public removeTargetGroup(group: MultiselectGroupModel) {
+    this._store.removeTargetGroup(group);
   }
 
   public selectAllItemsInList(
@@ -196,5 +206,9 @@ export class MultiselectComponent implements OnInit, OnChanges {
   ) {
     this._store.selectAllItemsInList(list);
     event.preventDefault();
+  }
+
+  public toggleTargetGroup(group: MultiselectGroupModel) {
+    this._store.toggleTargetGroup(group);
   }
 }

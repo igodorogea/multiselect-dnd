@@ -1,6 +1,7 @@
 $icon-size: 24px !default;
 .svg-icon {
-  display: inline-block;
+  display: inline-flex;
+  align-self: center;
   fill: currentColor;
   height: $icon-size;
   width: $icon-size;
