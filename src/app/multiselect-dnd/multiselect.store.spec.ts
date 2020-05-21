@@ -94,6 +94,22 @@ describe('MultiselectService', () => {
     expect(helpers.targetIndexes).toEqual([1, 3, 2, 4, 0]);
     service.orderTargetData(2, 0);
     expect(helpers.targetIndexes).toEqual([2, 1, 3, 4, 0]);
+    service.selectTargetItem(1);
+    service.selectTargetItem(2);
+    service.orderTargetData(4, 3);
+    expect(helpers.targetIndexes).toEqual([3, 2, 1, 0, 4]);
+    service.selectTargetItem(3);
+    service.selectTargetItem(2);
+    service.orderTargetData(4, 0);
+    expect(helpers.targetIndexes).toEqual([3, 2, 4, 1, 0]);
+    service.selectTargetItem(3);
+    service.selectTargetItem(1);
+    service.orderTargetData(4, 3);
+    expect(helpers.targetIndexes).toEqual([2, 4, 3, 1, 0]);
+    service.selectTargetItem(3);
+    service.selectTargetItem(1);
+    service.orderTargetData(0, 2);
+    expect(helpers.targetIndexes).toEqual([4, 2, 3, 1, 0]);
   });
 
   it('should drop from source to target', () => {
@@ -375,10 +391,33 @@ describe('MultiselectService', () => {
         expect(helpers.targetIndexes).toEqual([0, 1, 2, 12, 17]);
         service.orderTargetData(1, 3);
         expect(helpers.targetIndexes).toEqual([0, 2, 12, 1, 17]);
+        service.filterTargetData('');
+        expect(helpers.targetIndexes.toString()).toEqual(
+          '0,2,3,4,5,6,7,8,9,10,11,12,1,13,14,15,16,17,18,19'
+        );
+        service.filterTargetData('dolor');
         service.orderTargetData(0, 4);
         expect(helpers.targetIndexes).toEqual([2, 12, 1, 17, 0]);
+        service.filterTargetData('');
+        expect(helpers.targetIndexes.toString()).toEqual(
+          '2,3,4,5,6,7,8,9,10,11,12,1,13,14,15,16,17,0,18,19'
+        );
+        service.filterTargetData('dolor');
         service.orderTargetData(2, 0);
         expect(helpers.targetIndexes).toEqual([1, 2, 12, 17, 0]);
+        service.filterTargetData('');
+        expect(helpers.targetIndexes.toString()).toEqual(
+          '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,0,18,19'
+        );
+        service.filterTargetData('dolor');
+        service.selectTargetItem(1);
+        service.selectTargetItem(2);
+        service.orderTargetData(4, 3);
+        expect(helpers.targetIndexes).toEqual([12, 1, 2, 0, 17]);
+        service.filterTargetData('');
+        expect(helpers.targetIndexes.toString()).toEqual(
+          '3,4,5,6,7,8,9,10,11,12,13,14,15,16,1,2,0,17,18,19'
+        );
       });
     });
   });

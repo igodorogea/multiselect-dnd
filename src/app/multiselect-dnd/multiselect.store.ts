@@ -139,22 +139,92 @@ export class MultiselectStore {
 
   public orderTargetData(fromIndex: number, toIndex: number) {
     this.vmSubj.next(vm => {
-      const fromSourceIndex = vm.targetData[fromIndex].sourceIndex;
-      const toSourceIndex = vm.targetData[toIndex].sourceIndex;
-      const _fromIndex = vm._targetData.findIndex(
-        i => i.sourceIndex === fromSourceIndex
+      const _targetData = this._orderItemsInList(
+        fromIndex,
+        toIndex,
+        vm.targetData,
+        vm._targetData
       );
-      const _toIndex = vm._targetData.findIndex(
-        i => i.sourceIndex === toSourceIndex
-      );
-      const targetData = vm._targetData.slice(0);
-      const item = targetData.splice(_fromIndex, 1)[0];
-      targetData.splice(_toIndex, 0, item);
       return {
         ...vm,
-        ...this._updateTargetData(targetData, vm.searchTermTarget),
+        ...this._updateTargetData(_targetData, vm.searchTermTarget),
       };
     });
+  }
+
+  public orderTargetGroupData(
+    groupIndex: number,
+    fromIndex: number,
+    toIndex: number
+  ) {
+    this.vmSubj.next(vm => {
+      const targetGroups = vm._targetGroups.map(group => {
+        if (group.index === groupIndex) {
+          const items = this._orderItemsInList(
+            fromIndex,
+            toIndex,
+            vm.targetGroups.find(g => g.index === groupIndex).items,
+            group.items
+          );
+          return {
+            ...group,
+            items,
+          };
+        }
+        return group;
+      });
+      return {
+        ...vm,
+        ...this._updateTargetGroupsData(targetGroups, vm.searchTermTarget),
+      };
+    });
+  }
+
+  private _orderItemsInList(
+    fromIndex: number,
+    toIndex: number,
+    list: MultiselectDataModel[],
+    _list: MultiselectDataModel[]
+  ) {
+    const fromSourceIndex = list[fromIndex].sourceIndex;
+    const orderItems = list.filter(item => {
+      if (item.selected || item.sourceIndex === fromSourceIndex) {
+        item.selected = false;
+        return true;
+      }
+      return false;
+    });
+    const newList = _list.filter(item => !orderItems.includes(item));
+    const index = this._findInsertionPoint(
+      fromIndex,
+      toIndex,
+      list,
+      newList,
+      orderItems
+    );
+    newList.splice(index, 0, ...orderItems);
+    return newList;
+  }
+
+  private _findInsertionPoint(
+    fromIndex: number,
+    toIndex: number,
+    list: MultiselectDataModel[],
+    _list: MultiselectDataModel[],
+    items: MultiselectDataModel[]
+  ) {
+    if (items.includes(list[toIndex])) {
+      for (let i = toIndex + 1; i < list.length; i++) {
+        if (!items.includes(list[i])) {
+          return _list.findIndex(item => item === list[i]);
+        }
+      }
+      return list.length;
+    } else {
+      const delta = fromIndex < toIndex ? 1 : 0;
+      const index = _list.findIndex(item => item === list[toIndex]);
+      return index + delta;
+    }
   }
 
   public dropItemIntoTarget(
@@ -189,7 +259,7 @@ export class MultiselectStore {
         droppedItems.push({...item, hidden: false});
       }
     });
-    const targetData = this._insertItemIntoList(
+    const targetData = this._insertItemsIntoList(
       droppedItems,
       vm.targetData,
       vm._targetData,
@@ -221,7 +291,7 @@ export class MultiselectStore {
       }
       return _group;
     });
-    const targetData = this._insertItemIntoList(
+    const targetData = this._insertItemsIntoList(
       droppedItems,
       vm.targetData,
       vm._targetData,
@@ -234,7 +304,7 @@ export class MultiselectStore {
     };
   }
 
-  private _insertItemIntoList(
+  private _insertItemsIntoList(
     items: MultiselectDataModel[],
     list: MultiselectDataModel[],
     _list: MultiselectDataModel[],
@@ -492,31 +562,6 @@ export class MultiselectStore {
     });
   }
 
-  public orderTargetGroupData(
-    groupIndex: number,
-    fromIndex: number,
-    toIndex: number
-  ) {
-    this.vmSubj.next(vm => {
-      const targetGroups = vm._targetGroups.map(group => {
-        if (group.index === groupIndex) {
-          const items = group.items.slice(0);
-          const item = items.splice(fromIndex, 1)[0];
-          items.splice(toIndex, 0, item);
-          return {
-            ...group,
-            items,
-          };
-        }
-        return group;
-      });
-      return {
-        ...vm,
-        ...this._updateTargetGroupsData(targetGroups, vm.searchTermTarget),
-      };
-    });
-  }
-
   public dropItemIntoTargetGroup(
     fromList: MultiselectDataModel[],
     groupIndex: number,
@@ -572,7 +617,7 @@ export class MultiselectStore {
         const group = vm.targetGroups.find(g => g.index === _group.index);
         return {
           ..._group,
-          items: this._insertItemIntoList(
+          items: this._insertItemsIntoList(
             droppedItems,
             group.items,
             _group.items,
@@ -610,7 +655,7 @@ export class MultiselectStore {
         const group = vm.targetGroups.find(g => g.index === _group.index);
         return {
           ..._group,
-          items: this._insertItemIntoList(
+          items: this._insertItemsIntoList(
             droppedItems,
             group.items,
             _group.items,
@@ -642,7 +687,7 @@ export class MultiselectStore {
         const group = vm.targetGroups.find(g => g.index === _group.index);
         return {
           ..._group,
-          items: this._insertItemIntoList(
+          items: this._insertItemsIntoList(
             droppedItems,
             group.items,
             _group.items,
